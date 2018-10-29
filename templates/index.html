@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <title>Scrapy Demo!</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col p-5">
+            <p id="txtStatus"></p>
+            <hr>
+            <button class="btn btn-primary" onclick="onStartClicked()">Start</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script>
+
+
+    let url = `ws://${window.location.host}/ws/status/`;
+    let statusSocket = new WebSocket(url);
+
+    statusSocket.onmessage = function (e) {
+        let data = JSON.parse(e.data);
+        console.log(data);
+
+        let status = data['status'];
+        $('#txtStatus').text(status);
+    };
+
+    statusSocket.onclose = function (e) {
+        // handle if closed
+        console.error(e)
+    };
+
+
+    function onStartClicked() {
+        fetch('/crawl/', {
+            method: 'POST'
+        })
+            .then(resp => resp.json())
+            .then(data => {
+                console.log(data);
+
+                {% comment %}With websocket|sleep 2s in consumers.py{% endcomment %}
+                statusSocket.send(JSON.stringify({
+                    taskId: data.taskId
+                }));
+
+                {% comment %}Without websocket|sleep 2s{% endcomment %}
+                //sleep(2000).then(() => getStatus(data.taskId))
+
+            })
+            .catch(error => console.log(error.toString()))
+
+    }
+
+    function getStatus(taskId) {
+        fetch('/get-status/', {
+            method: 'POST',
+            body: JSON.stringify({taskId: taskId})
+        })
+            .then(resp => resp.json())
+            .then(data => {
+                console.log(data);
+
+                $('#txtStatus').text(data.status);
+
+                if (!data.status || data.status === "finished") return;
+
+                sleep(500).then(() => getStatus(taskId));
+            })
+            .catch(error => console.log(error.toString()))
+    }
+
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+</script>
+</body>
+</html>
