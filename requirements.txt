@@ -12,7 +12,7 @@ constantly==15.1.0
 cryptography==2.3.1
 cssselect==1.0.3
 daphne==2.2.2
-Django==2.1.2
+Django==2.2.10
 hyperlink==18.0.0
 idna==2.7
 incremental==17.5.0
