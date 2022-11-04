@@ -32,7 +32,7 @@ Scrapy==1.5.1
 scrapyd==1.2.0
 service-identity==17.0.0
 six==1.11.0
-Twisted==18.9.0
+Twisted==22.10.0
 txaio==18.8.1
 urllib3==1.24
 w3lib==1.19.0
